@@ -1,0 +1,365 @@
+
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Công nghệ trồng cây không dùng đất  </title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: phiếu thí nghiệm. Cột trái là mặt cắt vùng rễ, cột phải là bảng điều khiển; hai đồ thị theo thời gian ở dưới. */
+:root{
+  --bg:#edf2ec; --surface:#fafcf9; --ink:#14231b; --muted:#506258; --line:#cbd8cf;
+  --accent:#1f7a4d; --accent-ink:#ffffff;
+  --water:#1f6fcf; --oxy:#0b8aa3; --ion:#a96d00; --root:#7a5c2e; --bad:#b3261e; --ok:#1b7a43;
+  --tank:#dbe9f6; --chamber:#2a3a33; --soil:#6b4a2b;
+  --font:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1712; --surface:#16231c; --ink:#e6efe9; --muted:#93a89b; --line:#2b3d33;
+  --accent:#5fcf93; --accent-ink:#06210f;
+  --water:#62a8f5; --oxy:#4fd0e8; --ion:#f0b43c; --root:#d3b17a; --bad:#ff8d85; --ok:#5fcf8a;
+  --tank:#1c3550; --chamber:#0a110d; --soil:#8a6540; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0e1712; --surface:#16231c; --ink:#e6efe9; --muted:#93a89b; --line:#2b3d33;
+  --accent:#5fcf93; --accent-ink:#06210f;
+  --water:#62a8f5; --oxy:#4fd0e8; --ion:#f0b43c; --root:#d3b17a; --bad:#ff8d85; --ok:#5fcf8a;
+  --tank:#1c3550; --chamber:#0a110d; --soil:#8a6540; color-scheme:dark;}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:20px 40px}
+.wrap{max-width:1080px;margin-inline:auto;display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:end;justify-content:space-between}
+h1{margin:0;font-size:clamp(1.5rem,4.5vw,2.1rem);line-height:1.1;font-weight:800;letter-spacing:-.02em}
+h1 span{color:var(--accent)}
+.sub{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:6px;overflow:hidden}
+.seg button{font:inherit;font-weight:600;background:transparent;color:var(--ink);border:0;padding:8px 16px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+button:focus-visible,input:focus-visible,svg:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+.scene svg{display:block;width:100%;height:auto;max-width:420px;margin-inline:auto}
+.card h2{margin:0 0 8px;font-size:1rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer;font-weight:600}
+.chip small{font-weight:400;color:var(--muted);display:block;font-size:.72rem;line-height:1.2}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.chip[aria-pressed="true"] small{color:var(--accent-ink);opacity:.85}
+.ctl{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;margin-top:12px}
+.ctl label{font-weight:600}
+.ctl output{font-family:var(--mono);font-weight:700;font-variant-numeric:tabular-nums;text-align:right;min-width:7ch}
+.ctl input[type=range]{grid-column:1 / -1;width:100%;accent-color:var(--accent);height:26px}
+.sw{display:flex;gap:8px;align-items:center;margin-top:12px;font-weight:600}
+.sw button{font:inherit;font-weight:700;border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:6px 16px;cursor:pointer}
+.sw button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.run{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.btn{font:inherit;font-weight:600;border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:6px;padding:7px 14px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.time{font-family:var(--mono);font-weight:700;font-size:1.15rem;font-variant-numeric:tabular-nums;margin-left:auto}
+.tl{display:flex;align-items:center;gap:12px;margin-top:10px}
+.tl input{flex:1;min-width:0;accent-color:var(--accent);height:26px}
+.gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.g{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg)}
+.g span{display:block;color:var(--muted);font-size:.8rem}
+.g b{font-family:var(--mono);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:3px;background:var(--line);margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0}
+.verdict{margin-top:14px;padding:10px 12px;border-left:4px solid var(--accent);background:var(--bg);border-radius:0 6px 6px 0;min-height:3.2em;font-weight:500}
+.verdict.warn{border-color:var(--bad)}
+.charts svg{display:block;width:100%;height:auto}
+.note{color:var(--muted);font-size:.82rem;margin:8px 0 0;max-width:86ch}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.85rem;margin:2px 0 6px}
+.legend i{display:inline-block;width:18px;height:4px;border-radius:2px;margin-right:6px;vertical-align:middle}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Công nghệ trồng cây không dùng đất </span></h1>
+      <p class="sub">Lớp Digital của bộ học liệu giấy (Công nghệ 10, Bài 25). Dùng sau khi nhóm đã dự đoán trên thẻ tình huống.</p>
+    </div>
+    <div class="seg" role="group" aria-label="Hệ thống trồng">
+      <button id="bh" aria-pressed="true">Thủy canh</button>
+      <button id="ba" aria-pressed="false">Khí canh</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="card scene" aria-label="Mặt cắt vùng rễ">
+      <svg id="scene" viewBox="0 0 400 424" role="img" aria-label="Mặt cắt cây, rễ và dung dịch hoặc buồng khí canh">
+        <!-- cây -->
+        <g id="plant">
+          <path d="M200 176 C200 130 198 100 200 64" stroke="var(--accent)" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <ellipse cx="164" cy="104" rx="44" ry="17" transform="rotate(-24 164 104)" fill="var(--accent)" opacity=".9"/>
+          <ellipse cx="238" cy="92" rx="46" ry="17" transform="rotate(22 238 92)" fill="var(--accent)" opacity=".75"/>
+          <ellipse cx="170" cy="144" rx="38" ry="14" transform="rotate(-14 170 144)" fill="var(--accent)" opacity=".6"/>
+          <ellipse cx="232" cy="140" rx="38" ry="14" transform="rotate(12 232 140)" fill="var(--accent)" opacity=".5"/>
+        </g>
+        <!-- bể / buồng -->
+        <rect id="tank" x="60" y="182" width="280" height="226" rx="6" fill="var(--tank)" stroke="var(--ink)" stroke-width="2"/>
+        <rect id="water" x="62" y="236" width="276" height="170" fill="var(--water)" opacity=".28"/>
+        <line id="wline" x1="62" x2="338" y1="236" y2="236" stroke="var(--water)" stroke-width="2.5"/>
+        <rect id="chamber" x="60" y="182" width="280" height="226" rx="6" fill="var(--chamber)" opacity=".92" style="display:none"/>
+        <g id="oxy"></g>
+        <g id="bubbles"></g>
+        <g id="flow" style="display:none"></g>
+        <g id="spray"></g>
+        <g id="rootsFilm"></g>
+        <g id="roots"></g>
+        <rect x="54" y="170" width="292" height="14" rx="3" fill="var(--soil)" opacity=".0"/>
+        <rect x="54" y="172" width="292" height="12" rx="3" fill="var(--ink)" opacity=".85"/>
+        <text x="200" y="182.5" font-size="9" fill="var(--bg)" text-anchor="middle" font-weight="700">tấm xốp giữ cây</text>
+        <text id="tag1" x="68" y="228" font-size="12" font-weight="700" fill="var(--ink)"></text>
+        <text id="tag2" x="68" y="204" font-size="12" font-weight="700" fill="var(--bg)" style="display:none"></text>
+        <text id="clock" x="14" y="24" font-size="12" fill="var(--muted)" font-family="var(--mono)"></text>
+      </svg>
+    </section>
+
+    <section class="card" aria-label="Bảng điều khiển">
+      <h2>Tình huống (khớp với thẻ giấy)</h2>
+      <div class="chips" id="chips"></div>
+
+      <div id="hCtl">
+        <div class="sw"><span>Dung dịch</span>
+          <button id="aerOn" aria-pressed="true">Tuần hoàn, sục khí</button>
+          <button id="aerOff" aria-pressed="false">Đứng yên</button>
+        </div>
+      </div>
+      <div id="aCtl" hidden>
+        <div class="sw"><span>Bơm phun sương</span>
+          <button id="pumpOn" aria-pressed="true">Chạy</button>
+          <button id="pumpOff" aria-pressed="false">Hỏng</button>
+        </div>
+        <div class="ctl"><label for="iv">Chu kì phun</label><output id="ivO"></output>
+          <input type="range" id="iv" min="1" max="30" step="1" value="5"></div>
+      </div>
+      <div class="ctl"><label for="tp">Nhiệt độ</label><output id="tpO"></output>
+        <input type="range" id="tp" min="15" max="40" step="1" value="25"></div>
+      <div class="ctl"><label for="ph">pH dung dịch</label><output id="phO"></output>
+        <input type="range" id="ph" min="4" max="8" step="0.1" value="6"></div>
+
+      <div class="run">
+        <button class="btn primary" id="play">Chạy</button>
+        <button class="btn" id="reset">Về đầu</button>
+        <span class="time" id="timeTxt"></span>
+      </div>
+      <div class="tl"><input type="range" id="tt" min="0" max="288" step="1" value="0" aria-label="Thời gian"></div>
+
+      <div class="gauges">
+        <div class="g"><span id="g1l">Oxy hòa tan</span><b id="g1"></b><div class="bar"><i id="g1b"></i></div></div>
+        <div class="g"><span>Hấp thụ ion</span><b id="g2"></b><div class="bar"><i id="g2b"></i></div></div>
+        <div class="g"><span>Sức khỏe rễ</span><b id="g3"></b><div class="bar"><i id="g3b"></i></div></div>
+      </div>
+      <p class="verdict" id="verdict"></p>
+    </section>
+  </div>
+
+  <section class="card charts" aria-label="Đồ thị theo thời gian">
+    <h2 id="cTitle"></h2>
+    <div class="legend" id="legend"></div>
+    <svg id="c1" viewBox="0 0 760 190" role="img" aria-label="Đồ thị đại lượng chính theo thời gian"></svg>
+    <svg id="c2" viewBox="0 0 760 190" role="img" aria-label="Đồ thị hấp thụ ion và sức khỏe rễ theo thời gian"></svg>
+    <p class="note">Mô hình định tính để so sánh xu hướng, không dùng để tính toán. Độ hòa tan của oxy theo nhiệt độ lấy theo bảng nước ngọt bão hòa ở 1 atm (9,1 mg/L ở 20°C; 8,3 ở 25°C; 7,6 ở 30°C; 7,0 ở 35°C). Khoảng pH 5,5–6,5 là khoảng thường dùng cho rau thủy canh; giá trị chính xác tùy loài cây.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const TS=[[15,10.08],[20,9.09],[25,8.26],[30,7.56],[35,6.95],[40,6.41]];
+function dsat(T){for(let i=0;i<TS.length-1;i++){const [a,x]=TS[i],[b,y]=TS[i+1];if(T<=b)return x+(y-x)*(T-a)/(b-a)}return TS[TS.length-1][1]}
+function fpH(p){if(p>=5.5&&p<=6.5)return 1;if(p<5.5)return Math.max(.3,1-.7*(5.5-p)/1.5);return Math.max(.3,1-.7*(p-6.5)/1.5)}
+
+const SC={
+ S1:{sys:"h",aer:true,T:25,pH:6.0,l:"Thủy canh",s:"sục khí · 25°C · pH 6,0"},
+ S2:{sys:"h",aer:false,T:25,pH:6.0,l:"Thủy canh",s:"đứng yên · 25°C · pH 6,0"},
+ S3:{sys:"h",aer:false,T:35,pH:6.0,l:"Thủy canh",s:"đứng yên · 35°C · pH 6,0"},
+ S4:{sys:"h",aer:true,T:25,pH:4.5,l:"Thủy canh",s:"sục khí · 25°C · pH 4,5"},
+ S5:{sys:"a",pump:true,I:5,T:25,pH:6.0,l:"Khí canh",s:"phun 5 phút/lần · 25°C"},
+ S6:{sys:"a",pump:false,I:5,T:25,pH:6.0,l:"Khí canh",s:"bơm hỏng · 25°C"}
+};
+const S={sys:"h",aer:true,pump:true,I:5,T:25,pH:6.0,t:0,play:false,sc:"S1",data:null};
+
+/* ---------- mô hình ---------- */
+function simHydro(){
+  const H=72,dt=.05,out={t:[],a:[],U:[],h:[],sat:dsat(S.T),H:H,step:.25};
+  const k=S.aer?1.5:.05, sat=out.sat;
+  let DO=sat,h=1,steps=Math.round(H/dt),rec=Math.round(.25/dt);
+  for(let i=0;i<=steps;i++){
+    const t=i*dt;
+    if(i%rec===0){
+      const U=100*fpH(S.pH)*clamp(DO/6,0,1)*(.3+.7*h);
+      out.t.push(t);out.a.push(DO);out.U.push(U);out.h.push(h*100);
+    }
+    const c=.35*Math.pow(2,(S.T-25)/10)*(1+.5*t/H)*(.4+.6*h);
+    DO=Math.max(0,DO+dt*(k*(sat-DO)-c));
+    let dh=-.06*Math.max(0,(4-DO)/4);
+    if(S.pH<4.5||S.pH>7.5)dh-=.004;
+    if(DO>=5)dh+=.01*(1-h);
+    h=clamp(h+dt*dh,0,1);
+  }
+  return out;
+}
+function simAero(){
+  const H=60,dt=.1,out={t:[],a:[],U:[],h:[],sprayAt:[],H:H,step:.5};
+  const r=.05*(1+.04*(S.T-25));
+  let h=1,last=0,steps=Math.round(H/dt),rec=Math.round(.5/dt);
+  for(let i=0;i<=steps;i++){
+    const t=i*dt;
+    last=S.pump?Math.floor(t/S.I+1e-9)*S.I:0;
+    const M=Math.max(0,1-r*(t-last));
+    if(i%rec===0){
+      const U=100*fpH(S.pH)*clamp(M/.4,0,1)*(.3+.7*h);
+      out.t.push(t);out.a.push(M*100);out.U.push(U);out.h.push(h*100);out.sprayAt.push(t-last<.6&&(S.pump||t<.6));
+    }
+    let dh=0;if(M<.3)dh=-.05*(.3-M)/.3;else if(M>.5)dh=.01*(1-h);
+    h=clamp(h+dt*dh,0,1);
+  }
+  return out;
+}
+function recompute(){
+  S.data=S.sys==="h"?simHydro():simAero();
+  const n=S.data.t.length-1;$("tt").max=n;
+  if(S.t>n)S.t=n;
+  drawCharts();update();
+}
+
+/* ---------- cảnh ---------- */
+const rootPaths=[];
+(function(){
+  const xs=[150,172,194,216,238,260];
+  xs.forEach((x,i)=>{const len=130+((i*37)%50);const sw=(i%2?1:-1)*12;
+    rootPaths.push({d:`M${x} 184 C${x+sw} ${184+len*.3} ${x-sw} ${184+len*.65} ${x+sw*.5} ${184+len}`,w:4-((i%3)*.6)});
+  });
+})();
+const oxyDots=[];(function(){let s=7;const rnd=()=>{s=(s*9301+49297)%233280;return s/233280};for(let i=0;i<46;i++)oxyDots.push([72+rnd()*256,246+rnd()*150])})();
+const bub=[];(function(){let s=3;const rnd=()=>{s=(s*9301+49297)%233280;return s/233280};for(let i=0;i<14;i++)bub.push([128+rnd()*28,244+rnd()*150,2+rnd()*3])})();
+const drops=[];(function(){let s=11;const rnd=()=>{s=(s*9301+49297)%233280;return s/233280};[130,200,270].forEach(cx=>{for(let i=0;i<14;i++){const a=(rnd()-.5)*1.1;const d=20+rnd()*110;drops.push([cx+Math.sin(a)*d,396-Math.cos(a)*d,1.6+rnd()*1.8])}})})();
+function mix(a,b,t){return a.map((v,i)=>Math.round(v+(b[i]-v)*t))}
+function buildStatic(){
+  const rg=$("roots"),fg=$("rootsFilm");rg.innerHTML="";fg.innerHTML="";
+  rootPaths.forEach((p,i)=>{
+    rg.insertAdjacentHTML("beforeend",`<path class="rp" d="${p.d}" fill="none" stroke-width="${p.w}" stroke-linecap="round"/>`);
+    fg.insertAdjacentHTML("beforeend",`<path class="rf" d="${p.d}" fill="none" stroke="var(--water)" stroke-width="${p.w+3}" stroke-linecap="round" opacity="0"/>`);
+  });
+  $("oxy").innerHTML=oxyDots.map(d=>`<circle cx="${d[0].toFixed(1)}" cy="${d[1].toFixed(1)}" r="3.4" fill="var(--oxy)"/>`).join("");
+  $("bubbles").innerHTML=`<rect x="120" y="392" width="48" height="10" rx="3" fill="var(--ink)"/>`+bub.map(b=>`<circle cx="${b[0].toFixed(1)}" cy="${b[1].toFixed(1)}" r="${b[2].toFixed(1)}" fill="none" stroke="var(--oxy)" stroke-width="1.6"/>`).join("");
+  $("flow").innerHTML=`<path d="M330 400 H356 V212 H338" fill="none" stroke="var(--water)" stroke-width="3"/><polygon points="338,205 338,219 326,212" fill="var(--water)"/><rect x="316" y="394" width="26" height="14" rx="3" fill="var(--ink)"/>`;
+  $("spray").innerHTML=`<g id="nz">`+[130,200,270].map(cx=>`<rect x="${cx-5}" y="396" width="10" height="12" fill="var(--metal,#9aa)" stroke="var(--bg)"/>`).join("")+`</g>`+drops.map(d=>`<circle class="dr" cx="${d[0].toFixed(1)}" cy="${d[1].toFixed(1)}" r="${d[2].toFixed(1)}" fill="#cfe8ff" opacity="0"/>`).join("");
+}
+function applyMode(){
+  const h=S.sys==="h";
+  $("water").style.display=h?"":"none";$("wline").style.display=h?"":"none";
+  $("tank").style.display=h?"":"none";$("chamber").style.display=h?"none":"";
+  $("oxy").style.display=h?"":"none";$("bubbles").style.display=h&&S.aer?"":"none";$("flow").style.display=h&&S.aer?"":"none";
+  $("spray").style.display=h?"none":"";$("rootsFilm").style.display=h?"none":"";
+  $("tag1").textContent=h?"dung dịch dinh dưỡng":"";$("tag2").style.display=h?"none":"";
+  $("tag2").textContent="buồng tối, rễ treo trong không khí";
+  $("hCtl").hidden=!h;$("aCtl").hidden=h;
+  $("bh").setAttribute("aria-pressed",h);$("ba").setAttribute("aria-pressed",!h);
+  $("g1l").textContent=h?"Oxy hòa tan":"Độ ẩm bề mặt rễ";
+  $("cTitle").textContent=h?"Thủy canh trong 72 giờ":"Khí canh trong 60 phút";
+  $("legend").innerHTML=h?`<span><i style="background:var(--oxy)"></i>Oxy hòa tan (mg/L)</span>`:`<span><i style="background:var(--water)"></i>Độ ẩm bề mặt rễ (%)</span>`;
+  $("tp").value=S.T;$("ph").value=S.pH;$("iv").value=S.I;
+  $("aerOn").setAttribute("aria-pressed",S.aer);$("aerOff").setAttribute("aria-pressed",!S.aer);
+  $("pumpOn").setAttribute("aria-pressed",S.pump);$("pumpOff").setAttribute("aria-pressed",!S.pump);
+  document.querySelectorAll("#chips .chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.k===S.sc));
+}
+function labels(){
+  $("tpO").textContent=S.T+" °C";$("phO").textContent=S.pH.toFixed(1).replace(".",",");$("ivO").textContent=S.I+" phút";
+}
+
+/* ---------- vẽ khung hình ---------- */
+function update(){
+  const d=S.data,i=Math.round(S.t),h=S.sys==="h";
+  const a=d.a[i],U=d.U[i],hp=d.h[i],t=d.t[i];
+  const col=mix([238,228,198],[112,74,46],1-hp/100);
+  document.querySelectorAll(".rp").forEach(p=>p.setAttribute("stroke",`rgb(${col})`));
+  if(h){
+    const n=Math.round(clamp(a/d.sat,0,1)*oxyDots.length);
+    [...$("oxy").children].forEach((c,j)=>c.setAttribute("opacity",j<n?.95:0));
+  }else{
+    const sp=d.sprayAt[i];
+    document.querySelectorAll(".dr").forEach(c=>c.setAttribute("opacity",sp?.85:0));
+    document.querySelectorAll(".rf").forEach(c=>c.setAttribute("opacity",(a/100*.9).toFixed(2)));
+  }
+  $("clock").textContent=h?`t = ${t.toFixed(0)} giờ`:`t = ${t.toFixed(1).replace(".",",")} phút`;
+  $("timeTxt").textContent=h?`${t.toFixed(0)} / ${d.H} giờ`:`${t.toFixed(1).replace(".",",")} / ${d.H} phút`;
+  $("g1").textContent=h?a.toFixed(1).replace(".",",")+" mg/L":Math.round(a)+" %";
+  $("g1b").style.width=(h?clamp(a/d.sat,0,1)*100:a)+"%";
+  $("g2").textContent=Math.round(U)+" %";$("g2b").style.width=U+"%";
+  $("g3").textContent=Math.round(hp)+" %";$("g3b").style.width=hp+"%";
+  $("tt").value=i;
+  /* kết luận */
+  const reasons=[];
+  if(h&&a<3)reasons.push("Oxy hòa tan dưới 3 mg/L: rễ thiếu oxy để hô hấp, thiếu năng lượng để hút ion.");
+  if(!h&&a<30)reasons.push("Rễ khô giữa hai lần phun: màng nước quanh rễ mất, rễ không hút được.");
+  if(S.pH<5.5||S.pH>6.5)reasons.push("pH ngoài khoảng 5,5–6,5: ion khoáng khó được hấp thụ dù còn oxy.");
+  if(h&&S.T>=33&&S.aer===false)reasons.push("Nước nóng chứa ít oxy hơn, trong khi rễ hô hấp mạnh hơn.");
+  const v=$("verdict");
+  if(reasons.length){v.textContent=reasons.join(" ");v.className="verdict warn"}
+  else{v.textContent=h?"Rễ có đủ nước, ion khoáng và oxy: dung dịch được cấp oxy liên tục nên rễ hô hấp bình thường.":"Rễ luôn ẩm, nhận ion qua sương và có nhiều oxy trong không khí: rễ hoạt động tốt.";v.className="verdict"}
+  moveCursor();
+}
+
+/* ---------- đồ thị ---------- */
+const W=760,Hh=190,X0=52,X1=740,Y0=14,Y1=150;
+function xs(t){return X0+(t/S.data.H)*(X1-X0)}
+function chart(el,series,ymax,ytitle,unit){
+  const d=S.data;let s="";
+  const tickN=S.sys==="h"?6:6, step=d.H/tickN;
+  for(let k=0;k<=4;k++){const y=Y1-(Y1-Y0)*k/4;s+=`<line x1="${X0}" x2="${X1}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${X0-8}" y="${y+4}" font-size="11" text-anchor="end" fill="var(--muted)" font-family="var(--mono)">${(ymax*k/4).toFixed(ymax<20?1:0).replace(".",",")}</text>`}
+  for(let k=0;k<=tickN;k++){const t=step*k,x=xs(t);s+=`<line x1="${x}" x2="${x}" y1="${Y1}" y2="${Y1+5}" stroke="var(--ink)"/><text x="${x}" y="${Y1+19}" font-size="11" text-anchor="middle" fill="var(--muted)" font-family="var(--mono)">${Math.round(t)}</text>`}
+  s+=`<text x="${(X0+X1)/2}" y="${Y1+36}" font-size="12" text-anchor="middle" fill="var(--muted)">${S.sys==="h"?"thời gian (giờ)":"thời gian (phút)"}</text>`;
+  s+=`<text x="${X0}" y="9" font-size="12" fill="var(--muted)">${ytitle}</text>`;
+  series.forEach(se=>{let p="";se.v.forEach((v,i)=>{p+=(i?"L":"M")+xs(d.t[i]).toFixed(1)+" "+(Y1-clamp(v/ymax,0,1)*(Y1-Y0)).toFixed(1)+" "});
+    s+=`<path d="${p}" fill="none" stroke="var(--${se.c})" stroke-width="2.6" stroke-linejoin="round"/>`});
+  s+=`<line class="cur" x1="0" x2="0" y1="${Y0}" y2="${Y1}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+  el.innerHTML=s;
+}
+function drawCharts(){
+  const d=S.data,h=S.sys==="h";
+  chart($("c1"),[{v:d.a,c:h?"oxy":"water"}],h?10:100,h?"mg/L":"%");
+  chart($("c2"),[{v:d.U,c:"ion"},{v:d.h,c:"root"}],100,"%");
+  $("legend").innerHTML=(h?`<span><i style="background:var(--oxy)"></i>Oxy hòa tan (mg/L)</span>`:`<span><i style="background:var(--water)"></i>Độ ẩm bề mặt rễ (%)</span>`)+`<span><i style="background:var(--ion)"></i>Hấp thụ ion (%)</span><span><i style="background:var(--root)"></i>Sức khỏe rễ (%)</span>`;
+}
+function moveCursor(){
+  const d=S.data;const x=xs(d.t[Math.round(S.t)]);
+  document.querySelectorAll(".cur").forEach(l=>{l.setAttribute("x1",x);l.setAttribute("x2",x)});
+}
+
+/* ---------- điều khiển ---------- */
+function loadSc(k){
+  const c=SC[k];S.sc=k;S.sys=c.sys;S.T=c.T;S.pH=c.pH;
+  if(c.sys==="h")S.aer=c.aer;else{S.pump=c.pump;S.I=c.I}
+  S.t=0;S.play=false;$("play").textContent="Chạy";applyMode();labels();recompute();
+}
+function custom(){S.sc="";document.querySelectorAll("#chips .chip").forEach(c=>c.setAttribute("aria-pressed","false"));labels();recompute()}
+$("chips").innerHTML=Object.keys(SC).map(k=>`<button class="chip" data-k="${k}" aria-pressed="false">${k}<small>${SC[k].l}</small></button>`).join("");
+$("chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(b)loadSc(b.dataset.k)});
+$("bh").onclick=()=>{S.sys="h";S.sc="";S.t=0;S.play=false;$("play").textContent="Chạy";applyMode();labels();recompute()};
+$("ba").onclick=()=>{S.sys="a";S.sc="";S.t=0;S.play=false;$("play").textContent="Chạy";applyMode();labels();recompute()};
+$("aerOn").onclick=()=>{S.aer=true;applyMode();custom()};$("aerOff").onclick=()=>{S.aer=false;applyMode();custom()};
+$("pumpOn").onclick=()=>{S.pump=true;applyMode();custom()};$("pumpOff").onclick=()=>{S.pump=false;applyMode();custom()};
+$("tp").oninput=e=>{S.T=+e.target.value;custom()};$("ph").oninput=e=>{S.pH=+e.target.value;custom()};$("iv").oninput=e=>{S.I=+e.target.value;custom()};
+$("tt").oninput=e=>{S.t=+e.target.value;S.play=false;$("play").textContent="Chạy";update()};
+$("play").onclick=()=>{if(S.t>=S.data.t.length-1)S.t=0;S.play=!S.play;$("play").textContent=S.play?"Dừng":"Chạy"};
+$("reset").onclick=()=>{S.t=0;S.play=false;$("play").textContent="Chạy";update()};
+let last=0;
+function loop(ts){
+  if(S.play){const dt=Math.min(.05,(ts-last)/1000);const n=S.data.t.length-1;S.t=Math.min(n,S.t+dt*n/12);
+    if(S.t>=n){S.play=false;$("play").textContent="Chạy"}update()}
+  last=ts;requestAnimationFrame(loop);
+}
+buildStatic();
+S.sc="S2";loadSc("S2");S.t=Math.round((S.data.t.length-1)*.62);update();
+requestAnimationFrame(loop);
+})();
+</script>
+
+</body></html>
